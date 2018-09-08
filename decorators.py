@@ -1,5 +1,6 @@
 import functools
-from flask import abort
+from flask import abort, Response, jsonify
+import json
 
 
 def db_check_or_return_500(func):
@@ -12,5 +13,5 @@ def db_check_or_return_500(func):
             else:
                 func(*args, **kwargs)
         except:
-            abort(500)
+            abort(500, "An error occurred when connecting to the database.")
     return function_that_runs_func
