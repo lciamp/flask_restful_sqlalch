@@ -14,6 +14,7 @@ class Item(Resource):
     parser.add_argument('price',
                         type=float,
                         required=True,
+                        location='json',
                         help="Price field can not be left blank")
 
     def get(self, name):

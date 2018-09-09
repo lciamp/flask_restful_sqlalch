@@ -1,5 +1,4 @@
-from flask import Flask
-from werkzeug.serving import run_simple
+from flask import Flask, redirect, url_for
 from flask_restful import Api
 from flask_jwt import JWT
 from security import authenticate, identity
@@ -13,6 +12,20 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'my_key'
 api = Api(app)
 jwt = JWT(app, authenticate, identity)  # /auth
+
+
+@app.before_first_request
+def create_tables():
+    db.create_all()
+
+
+@app.route('/', methods=['GET'])
+def index():
+    # TODO create index template
+    redirect(url_for('index'))
+    redirect(api.url_for(Item))
+    return 'index template here'
+
 
 api.add_resource(ItemList, '/items')
 api.add_resource(Item, '/item/<string:name>')

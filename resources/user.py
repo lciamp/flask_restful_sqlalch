@@ -17,11 +17,13 @@ class UserRegister(Resource):
     parser.add_argument('username',
                         type=str,
                         required=True,
+                        location='json',
                         help="Username can not be blank"
                         )
     parser.add_argument('password',
                         type=str,
                         required=True,
+                        location='json',
                         help="Password can not be blank"
                         )
 
