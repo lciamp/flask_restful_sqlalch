@@ -9,17 +9,7 @@ class User(Resource):
 
     @jwt_required()
     def get(self):
-        try:
-            connection = sqlite3.connect('data.db')
-            cursor = connection.cursor()
-            query = "SELECT * FROM users"
-            result = cursor.execute(query)
-            rows = result.fetchall()
-            users = [{'name': row[1]} for row in rows]
-            connection.close()
-        except sqlite3.OperationalError:
-            abort(500)
-        return {'users': users}, 200
+        return {'users': [user.json() for user in UserModel.query.all()]}, 200
 
 
 class UserRegister(Resource):
@@ -41,16 +31,10 @@ class UserRegister(Resource):
         if UserModel.find_by_username(data['username']):
             return {'message': 'A user with that username already exists'}, 400
 
-        connection = sqlite3.connect('data.db')
-        cursor = connection.cursor()
+        user = UserModel(**data)
+        user.save_to_db()
 
-        query = "INSERT INTO users VALUES (NULL, ?, ?)"
-        cursor.execute(query, (data['username'], data['password']))
-
-        connection.commit()
-        connection.close()
-
-        return {'message': 'User created successfully.'}, 201
+        return {'message': "User '{}' created successfully.".format(user.username)}, 201
 
 
 

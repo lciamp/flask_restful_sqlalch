@@ -1,23 +1,12 @@
 from flask_restful import Resource, reqparse
 from flask import abort
 from flask_jwt import jwt_required, current_identity
-import sqlite3
 from models.item import ItemModel
 
 
 class ItemList(Resource):
     def get(self):
-        try:
-            connection = sqlite3.connect('data.db')
-            cursor = connection.cursor()
-            query = "SELECT * FROM items ORDER BY name"
-            result = cursor.execute(query)
-            rows = result.fetchall()
-            items = [{'name': row[0], 'price': row[1]} for row in rows]
-            connection.close()
-        except sqlite3.OperationalError:
-            abort(500)
-        return {'items': items}, 200
+        return {'items': [item.json() for item in ItemModel.query.all()]}, 200
 
 
 class Item(Resource):
@@ -44,7 +33,7 @@ class Item(Resource):
 
         item = ItemModel(name,  data['price'])
 
-        item.insert()
+        item.save_to_db()
 
         return item.json(), 201
 
@@ -53,25 +42,19 @@ class Item(Resource):
         data = Item.parser.parse_args()
         item = ItemModel.find_by_name(name)
 
-        updated_item = ItemModel(name, data['price'])
         if item is None:
-            updated_item.insert()
+            item = ItemModel(name, data['price'])
         else:
-            updated_item.update()
-        return updated_item.json(), 200
+            item.price = data['price']
+
+        item.save_to_db()
+
+        return item.json(), 200
 
     @jwt_required()
     def delete(self, name):
-        try:
-            connection = sqlite3.connect('data.db')
-            cursor = connection.cursor()
-
-            query = "DELETE FROM items WHERE name=?"
-            cursor.execute(query, (name,))
-
-            connection.commit()
-            connection.close()
-        except sqlite3.OperationalError:
-            abort(500)
+        item = ItemModel.find_by_name(name)
+        if item:
+            item.delete_from_db()
 
         return {'message': "Item '{}' deleted.".format(name)}, 202
