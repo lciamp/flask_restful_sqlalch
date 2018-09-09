@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse
 from flask import abort
-from flask_jwt import jwt_required
+from flask_jwt import jwt_required, current_identity
 import sqlite3
 from models.item import ItemModel
 
@@ -10,7 +10,7 @@ class ItemList(Resource):
         try:
             connection = sqlite3.connect('data.db')
             cursor = connection.cursor()
-            query ="SELECT * FROM items"
+            query = "SELECT * FROM items ORDER BY name"
             result = cursor.execute(query)
             rows = result.fetchall()
             items = [{'name': row[0], 'price': row[1]} for row in rows]
@@ -27,14 +27,15 @@ class Item(Resource):
                         required=True,
                         help="Price field can not be left blank")
 
-    # @jwt_required()
     def get(self, name):
+        # user = current_identity
         item = ItemModel.find_by_name(name)
 
         if item:
             return item.json(), 200
         return {'message': "Item '{}' not found".format(name)}, 404
 
+    @jwt_required()
     def post(self, name):
         if ItemModel.find_by_name(name):
             return {'message': "An item with name '{}' already exists".format(name)}, 400
@@ -47,6 +48,7 @@ class Item(Resource):
 
         return item.json(), 201
 
+    @jwt_required()
     def put(self, name):
         data = Item.parser.parse_args()
         item = ItemModel.find_by_name(name)
@@ -58,6 +60,7 @@ class Item(Resource):
             updated_item.update()
         return updated_item.json(), 200
 
+    @jwt_required()
     def delete(self, name):
         try:
             connection = sqlite3.connect('data.db')

@@ -1,6 +1,25 @@
 import sqlite3
 from flask_restful import Resource, reqparse
+from flask_jwt import jwt_required
 from models.user import UserModel
+from flask import abort
+
+
+class User(Resource):
+
+    @jwt_required()
+    def get(self):
+        try:
+            connection = sqlite3.connect('data.db')
+            cursor = connection.cursor()
+            query = "SELECT * FROM users"
+            result = cursor.execute(query)
+            rows = result.fetchall()
+            users = [{'name': row[1]} for row in rows]
+            connection.close()
+        except sqlite3.OperationalError:
+            abort(500)
+        return {'users': users}, 200
 
 
 class UserRegister(Resource):
