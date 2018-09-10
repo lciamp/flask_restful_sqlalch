@@ -1,6 +1,5 @@
 from flask_restful import Resource, reqparse
-from flask import abort
-from flask_jwt import jwt_required, current_identity
+from flask_jwt import jwt_required
 from models.item import ItemModel
 
 
@@ -15,7 +14,12 @@ class Item(Resource):
                         type=float,
                         required=True,
                         location='json',
-                        help="Price field can not be left blank")
+                        help="price field can not be left blank")
+    parser.add_argument('store_id',
+                        type=int,
+                        required=True,
+                        location='json',
+                        help="store_id field can not be left blank")
 
     def get(self, name):
         # user = current_identity
@@ -32,7 +36,7 @@ class Item(Resource):
 
         data = Item.parser.parse_args()
 
-        item = ItemModel(name,  data['price'])
+        item = ItemModel(name,  **data)
 
         item.save_to_db()
 
@@ -44,13 +48,13 @@ class Item(Resource):
         item = ItemModel.find_by_name(name)
 
         if item is None:
-            item = ItemModel(name, data['price'])
+            item = ItemModel(name, **data)
         else:
             item.price = data['price']
 
         item.save_to_db()
 
-        return item.json(), 200
+        return item.json(), 202
 
     @jwt_required()
     def delete(self, name):
