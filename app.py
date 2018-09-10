@@ -2,8 +2,7 @@ from flask import Flask, redirect, url_for
 from flask_restful import Api
 from flask_jwt import JWT
 from security import authenticate, identity
-from resources.user import UserRegister, User
-from resources.item import Item, ItemList
+from resources import Store, StoreList, Item, ItemList, UserList, UserRegister
 
 
 app = Flask(__name__)
@@ -29,7 +28,9 @@ def index():
 
 api.add_resource(ItemList, '/items')
 api.add_resource(Item, '/item/<string:name>')
-api.add_resource(User, '/users')
+api.add_resource(StoreList, '/stores')
+api.add_resource(Store, '/store/<string:name>')
+api.add_resource(UserList, '/users')
 api.add_resource(UserRegister, '/register')
 
 
