@@ -27,9 +27,9 @@ def index():
 
 
 api.add_resource(ItemList, '/items')
-api.add_resource(Item, '/item/<string:name>')
+api.add_resource(Item, '/items/<string:name>')
 api.add_resource(StoreList, '/stores')
-api.add_resource(Store, '/store/<string:name>')
+api.add_resource(Store, '/stores/<string:name>')
 api.add_resource(UserList, '/users')
 api.add_resource(UserRegister, '/register')
 

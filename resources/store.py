@@ -9,13 +9,6 @@ class StoreList(Resource):
 
 
 class Store(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('name',
-                        type=str,
-                        required=True,
-                        location='json',
-                        help="name field can not be left blank")
-
     def get(self, name):
         store = StoreModel.find_by_name(name)
         if store:

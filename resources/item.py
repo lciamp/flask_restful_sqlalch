@@ -1,6 +1,7 @@
 from flask_restful import Resource, reqparse
 from flask_jwt import jwt_required
 from models.item import ItemModel
+from parsers import item_parser
 
 
 class ItemList(Resource):
@@ -9,20 +10,9 @@ class ItemList(Resource):
 
 
 class Item(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('price',
-                        type=float,
-                        required=True,
-                        location='json',
-                        help="price field can not be left blank")
-    parser.add_argument('store_id',
-                        type=int,
-                        required=True,
-                        location='json',
-                        help="store_id field can not be left blank")
-
     def get(self, name):
         # user = current_identity
+
         item = ItemModel.find_by_name(name)
 
         if item:
@@ -34,7 +24,7 @@ class Item(Resource):
         if ItemModel.find_by_name(name):
             return {'message': "An item with name '{}' already exists".format(name)}, 400
 
-        data = Item.parser.parse_args()
+        data = item_parser.parse_args()
 
         item = ItemModel(name,  **data)
 
@@ -44,13 +34,14 @@ class Item(Resource):
 
     @jwt_required()
     def put(self, name):
-        data = Item.parser.parse_args()
+        data = item_parser.parse_args()
         item = ItemModel.find_by_name(name)
 
         if item is None:
             item = ItemModel(name, **data)
         else:
             item.price = data['price']
+            item.store_id = data['store_id']
 
         item.save_to_db()
 
