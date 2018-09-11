@@ -13,3 +13,17 @@ item_parser.add_argument('store_id',
                          required=True,
                          help="store_id field can not be left blank")
 
+
+user_parser = reqparse.RequestParser()
+user_parser.add_argument('username',
+                         type=str,
+                         required=True,
+                         location='json',
+                         help="Username can not be blank"
+                         )
+user_parser.add_argument('password',
+                         type=str,
+                         required=True,
+                         location='json',
+                         help="Password can not be blank"
+                         )

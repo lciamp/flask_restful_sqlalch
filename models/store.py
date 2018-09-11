@@ -20,6 +20,11 @@ class StoreModel(db.Model):
     def find_by_name(cls, name):
         return cls.query.filter_by(name=name).first()
 
+    @classmethod
+    @db_check_or_return_500
+    def find_all(cls):
+        return cls.query.all()
+
     @db_check_or_return_500
     def save_to_db(self):
         db.session.add(self)

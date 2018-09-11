@@ -1,11 +1,11 @@
-from flask_restful import Resource, reqparse
+from flask_restful import Resource
 from flask_jwt import jwt_required
 from models.store import StoreModel
 
 
 class StoreList(Resource):
     def get(self):
-        return {'stores': [store.json() for store in StoreModel.query.all()]}, 200
+        return {'stores': [store.json() for store in StoreModel.find_all()]}, 200
 
 
 class Store(Resource):

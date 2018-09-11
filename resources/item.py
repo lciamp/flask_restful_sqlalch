@@ -1,22 +1,23 @@
 from flask_restful import Resource, reqparse
-from flask_jwt import jwt_required
+from flask_jwt import jwt_required, current_identity
 from models.item import ItemModel
 from parsers import item_parser
 
 
 class ItemList(Resource):
     def get(self):
-        return {'items': [item.json() for item in ItemModel.query.all()]}, 200
+        return {'items': [item.json() for item in ItemModel.find_all()]}, 200
 
 
 class Item(Resource):
+    @jwt_required()
     def get(self, name):
-        # user = current_identity
-
+        print(current_identity.username)
         item = ItemModel.find_by_name(name)
 
         if item:
             return item.json(), 200
+
         return {'message': "Item '{}' not found".format(name)}, 404
 
     @jwt_required()
@@ -37,11 +38,11 @@ class Item(Resource):
         data = item_parser.parse_args()
         item = ItemModel.find_by_name(name)
 
-        if item is None:
-            item = ItemModel(name, **data)
-        else:
+        if item:
             item.price = data['price']
             item.store_id = data['store_id']
+        else:
+            item = ItemModel(name, **data)
 
         item.save_to_db()
 
