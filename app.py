@@ -1,9 +1,17 @@
 from flask import Flask, redirect, url_for
 from flask_restful import Api
-from flask_jwt import JWT
+from flask_jwt_extended import JWTManager
 
-from security import authenticate, identity
-from resources import Store, StoreList, Item, ItemList, UserList, UserRegister
+from resources import (
+    Store,
+    StoreList,
+    Item,
+    ItemList,
+    UserList,
+    UserRegister,
+    User,
+    UserLogin
+)
 
 
 app = Flask(__name__)
@@ -13,7 +21,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
 app.secret_key = 'my_key'
 api = Api(app)
-jwt = JWT(app, authenticate, identity)  # /auth
+jwt = JWTManager(app)
 
 
 @app.before_first_request
@@ -31,10 +39,14 @@ def index():
 
 api.add_resource(ItemList, '/items')
 api.add_resource(Item, '/items/<string:name>')
+
 api.add_resource(StoreList, '/stores')
 api.add_resource(Store, '/stores/<string:name>')
+
 api.add_resource(UserList, '/users')
+api.add_resource(User, '/users/<int:user_id>')
 api.add_resource(UserRegister, '/register')
+api.add_resource(UserLogin, '/login')
 
 
 if __name__ == '__main__':

@@ -1,7 +1,20 @@
 from flask_restful import Resource, reqparse
-from flask_jwt import jwt_required, current_identity
+from flask_jwt_extended import jwt_required, current_user
 from models.item import ItemModel
-from parsers import item_parser
+
+_item_parser = reqparse.RequestParser()
+_item_parser.add_argument('price',
+                          type=float,
+                          required=True,
+                          location='json',
+                          help="price field can not be left blank"
+                          )
+_item_parser.add_argument('store_id',
+                          type=int,
+                          location='json',
+                          required=True,
+                          help="store_id field can not be left blank"
+                          )
 
 
 class ItemList(Resource):
@@ -10,9 +23,9 @@ class ItemList(Resource):
 
 
 class Item(Resource):
-    @jwt_required()
+    @jwt_required
     def get(self, name):
-        print(current_identity.username)
+        print(current_user.username)
         item = ItemModel.find_by_name(name)
 
         if item:
@@ -20,12 +33,12 @@ class Item(Resource):
 
         return {'message': "Item '{}' not found".format(name)}, 404
 
-    @jwt_required()
+    @jwt_required
     def post(self, name):
         if ItemModel.find_by_name(name):
             return {'message': "An item with name '{}' already exists".format(name)}, 400
 
-        data = item_parser.parse_args()
+        data = _item_parser.parse_args()
 
         item = ItemModel(name,  **data)
 
@@ -33,9 +46,9 @@ class Item(Resource):
 
         return item.json(), 201
 
-    @jwt_required()
+    @jwt_required
     def put(self, name):
-        data = item_parser.parse_args()
+        data = _item_parser.parse_args()
         item = ItemModel.find_by_name(name)
 
         if item:
@@ -48,7 +61,7 @@ class Item(Resource):
 
         return item.json(), 202
 
-    @jwt_required()
+    @jwt_required
     def delete(self, name):
         item = ItemModel.find_by_name(name)
         if item:

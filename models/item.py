@@ -30,7 +30,6 @@ class ItemModel(db.Model):
         return cls.query.filter_by(name=name).first()
 
     @classmethod
-    @db_check_or_return_500
     def find_all(cls):
         return cls.query.all()
 
